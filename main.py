@@ -2,6 +2,7 @@
 import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+
 from MQTT import *
 #MQTT
 MQTT_TOPIC_AI = "/innovation/valvecontroller/ai" #"/innovation/airmonitoring/NBIOTs/AI"
