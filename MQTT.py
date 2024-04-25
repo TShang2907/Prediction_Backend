@@ -39,27 +39,27 @@ class MQTTHelper:
         #self.recvCallBack(message)
         print("Topic",message.topic)
         print("Received: ", message.payload.decode("utf-8"))
-        if message.topic=="/innovation/airmonitoring/NBIOTs":
-            # Dữ liệu bạn muốn ghi lên Google Sheets
-            new_values = [
-                [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
-            ]
-            # Thực hiện việc cập nhật dữ liệu vào bảng tính
-            request_body = {
-                'values': new_values
-            }
+        # if message.topic=="/innovation/airmonitoring/NBIOTs":
+        #     # Dữ liệu bạn muốn ghi lên Google Sheets
+        #     new_values = [
+        #         [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
+        #     ]
+        #     # Thực hiện việc cập nhật dữ liệu vào bảng tính
+        #     request_body = {
+        #         'values': new_values
+        #     }
 
-            response = service.spreadsheets().values().append(
-                spreadsheetId=spreadsheet_id, 
-                range=sheet_name,
-                valueInputOption='USER_ENTERED',
-                body=request_body,
-                insertDataOption='INSERT_ROWS',
-                responseDateTimeRenderOption='FORMATTED_STRING'
+        #     response = service.spreadsheets().values().append(
+        #         spreadsheetId=spreadsheet_id, 
+        #         range=sheet_name,
+        #         valueInputOption='USER_ENTERED',
+        #         body=request_body,
+        #         insertDataOption='INSERT_ROWS',
+        #         responseDateTimeRenderOption='FORMATTED_STRING'
 
-            ).execute()
+        #     ).execute()
 
-            print(json.dumps(response, indent=4))
+        #     print(json.dumps(response, indent=4))
 
 
     def setRecvCallBack(self, func):
