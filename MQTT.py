@@ -10,10 +10,10 @@ MQTT_PORT = 1883
 MQTT_USERNAME = "innovation"
 MQTT_PASSWORD = "Innovation_RgPQAZoA5N"
 MQTT_TOPIC_SUB_AIR = "/innovation/airmonitoring/NBIOTs"
-recvCallBack = None
+
 
 class MQTTHelper:
-
+    recvCallBack = None
     def mqtt_connected(self, client, userdata, flags, rc):
         print("Connected succesfully!!")
         client.subscribe(MQTT_TOPIC_SUB_AIR)
