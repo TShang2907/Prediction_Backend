@@ -13,7 +13,6 @@ MQTT_TOPIC_SUB_AIR = "/innovation/airmonitoring/NBIOTs"
 
 
 class MQTTHelper:
-    recvCallBack = None
     def mqtt_connected(self, client, userdata, flags, rc):
         print("Connected succesfully!!")
         client.subscribe(MQTT_TOPIC_SUB_AIR)
