@@ -46,6 +46,7 @@ def receive_callback(message):
 
 # Gọi phương thức setRecvCallBack để gán hàm xử lý cho việc nhận thông điệp
 mqtt.setRecvCallBack(receive_callback)
+mqtt.start_loop()
 
 while True: 
     pass
