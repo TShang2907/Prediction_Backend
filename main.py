@@ -5,7 +5,7 @@ from googleapiclient.discovery import build
 
 from MQTT import *
 #MQTT
-MQTT_TOPIC_AI = "/innovation/airmonitoring/AI" #"/innovation/airmonitoring/NBIOTs/AI"
+MQTT_TOPIC_AI = "/innovation/airmonitoring/AI"
 mqtt=MQTTHelper()
 
 #Google Sheet
