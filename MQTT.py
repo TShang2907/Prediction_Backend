@@ -23,9 +23,9 @@ class MQTTHelper:
 
 
     def mqtt_recv_message(self, client, userdata, message):
-        self.recvCallBack(message)
         print("Topic",message.topic)
-
+        self.recvCallBack(message)
+        
     def setRecvCallBack(self, func):
         self.recvCallBack = func
         
@@ -43,9 +43,10 @@ class MQTTHelper:
     
     def publish(self, topic, message):
         self.mqttClient.publish(topic, str(message), retain=True)
+        print("Send to MQTT Successfully !!")
     
     def start_loop(self):
-        self.mqttClient.loop_start()
+        self.mqttClient.loop_forever()
     
 # mqtt=MQTTHelper()
 
