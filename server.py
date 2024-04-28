@@ -66,6 +66,12 @@ real_values = [
 ]
 
 def storeDatabase(new_values,sheet_name):
+  if(sheet_name=='RealData!A:K'):
+    print("Send real data to Google Sheet: ",new_values[0])
+  else:
+    print("Send prediction data to Google Sheet: ",new_values[0])
+
+
   request_body = {
             'values': new_values
         }
@@ -102,21 +108,18 @@ def read_data():
     print("Count Rows: ",countRows)
     X_test[0] = data_float32
     print("X_test",X_test)
-    countRows=countRows+1
-  
+
 def onMessage(data):
   global countPrediction  # Khai báo biến count là biến toàn cục
-  global countRows
   index_value=2
   json_data = json.loads(data.payload.decode("utf-8"))
   print("Received: ",json_data )
- 
+  read_data()
   #lấy thoi gian hien tai
   current_time=datetime.now()
   prediction_values[0][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
   real_values[0][1]=prediction_values[0][1]
-  print(real_values[0][1])
-  
+ 
   # Chuyển đổi thành epoch time
   epoch_time = int(current_time.timestamp())
   prediction_values[0][0]=epoch_time
@@ -130,9 +133,9 @@ def onMessage(data):
     index_value=index_value+1
   
   storeDatabase(real_values,real_sheet)
-  read_data()
+  
  # Load model Prediction, tinh gia tri du doan
-  loaded_model = load_model('LSTM.keras')
+  loaded_model = load_model('LSTM2k2.keras')
   yhat = loaded_model.predict(X_test, verbose=0)   
   
   # Làm tròn các giá trị trong y_hat[0][0] đến 2 chữ số thập phân
@@ -140,18 +143,17 @@ def onMessage(data):
 
   # Gan gia tri du doan
   prediction_values[0][2:] = rounded_values
-  print(rounded_values)
   
-
-  message["sensor_predict"][0]["temp_0001"] = round(yhat[0][0][0], 2)
-  message["sensor_predict"][0]["humi_0001"] = round(yhat[0][0][1],2)
-  message["sensor_predict"][0]["temp_0002"] = round(yhat[0][0][2],2)
-  message["sensor_predict"][0]["humi_0002"] = round(yhat[0][0][3],2)
-  message["sensor_predict"][0]["ph_0002"] = round(yhat[0][0][4],2)
-  message["sensor_predict"][0]["EC_0002"] = round(yhat[0][0][5],2)
-  message["sensor_predict"][0]["Nito_0002"] = round(yhat[0][0][6],2)
-  message["sensor_predict"][0]["Photpho_0002"] = round(yhat[0][0][7],2)
-  message["sensor_predict"][0]["Kali_0002"] = round(yhat[0][0][8],2)
+  
+  message["sensor_predict"][0]["temp_0001"] = rounded_values[0]
+  message["sensor_predict"][0]["humi_0001"] = rounded_values[1]
+  message["sensor_predict"][0]["temp_0002"] = rounded_values[2]
+  message["sensor_predict"][0]["humi_0002"] = rounded_values[3]
+  message["sensor_predict"][0]["ph_0002"] = rounded_values[4]
+  message["sensor_predict"][0]["EC_0002"] = rounded_values[5]
+  message["sensor_predict"][0]["Nito_0002"] = rounded_values[6]
+  message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
+  message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
 
 
   mqtt.publish(MQTT_TOPIC_AI, message)
