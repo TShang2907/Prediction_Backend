@@ -15,7 +15,7 @@ mqtt=MQTTHelper()
 
 # Google Sheets Receive Data
 sheetGetData_id = '1A1V1pnv-MvBhynMW7rBfc0m5X6Cc3QmOssjgjzMl8j0'
-countRows=2
+countRows=500
 isFirst=True
 # API key
 api_key = 'AIzaSyCGQxAPIFmR03S3CbNDtulHhxfdAQNmTbM'   # Lấy tại Google Cloud -->API_KEY
@@ -107,14 +107,15 @@ def read_data():
     data_float32 = np.array(array_values, dtype=np.float32)
     print("Count Rows: ",countRows)
     X_test[0] = data_float32
-    print("X_test",X_test)
+
+read_data()
 
 def onMessage(data):
   global countPrediction  # Khai báo biến count là biến toàn cục
   index_value=2
   json_data = json.loads(data.payload.decode("utf-8"))
   print("Received: ",json_data )
-  read_data()
+  
   #lấy thoi gian hien tai
   current_time=datetime.now()
   prediction_values[0][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
@@ -132,6 +133,11 @@ def onMessage(data):
       real_values[0][index_value]=sensor["value"]
     index_value=index_value+1
   
+  # Update  new value for X_test
+  mqtt_value=np.array(real_values[0][2:], dtype=np.float32)
+  X_test[0] = np.vstack((X_test[0][1:], mqtt_value))
+  print("X_test",X_test)
+
   storeDatabase(real_values,real_sheet)
   
  # Load model Prediction, tinh gia tri du doan
