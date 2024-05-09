@@ -66,47 +66,53 @@ real_values = [
 ]
 
 def storeDatabase(new_values,sheet_name):
-  if(sheet_name=='RealData!A:K'):
-    print("Send real data to Google Sheet: ",new_values[0])
-  else:
-    print("Send prediction data to Google Sheet: ",new_values[0])
+  try:
+    if(sheet_name=='RealData!A:K'):
+      print("Send real data to Google Sheet: ",new_values[0])
+    else:
+      print("Send prediction data to Google Sheet: ",new_values[0])
 
 
-  request_body = {
-            'values': new_values
-        }
-  response = service.spreadsheets().values().append(
-    spreadsheetId=spreadsheet_id, 
-    range=sheet_name,
-    valueInputOption='USER_ENTERED',
-    body=request_body,
-    insertDataOption='INSERT_ROWS',
-    responseDateTimeRenderOption='FORMATTED_STRING'
-  ).execute()
-
-  print(json.dumps(response, indent=4))
+    request_body = {
+              'values': new_values
+          }
+    response = service.spreadsheets().values().append(
+      spreadsheetId=spreadsheet_id, 
+      range=sheet_name,
+      valueInputOption='USER_ENTERED',
+      body=request_body,
+      insertDataOption='INSERT_ROWS',
+      responseDateTimeRenderOption='FORMATTED_STRING'
+    ).execute()
+    print(json.dumps(response, indent=4))
+    
+  except Exception as e:
+    print("Đã xảy ra lỗi:", e)
 
 
 def read_data():
-  global countRows
-  range_name=f'RealData!C{countRows}:K'
-  response = service.spreadsheets().values().get(
-    spreadsheetId=spreadsheet_id, 
-    range=range_name,
-    valueRenderOption='UNFORMATTED_VALUE',
-    majorDimension='ROWS',
-  ).execute()
+  try:
+    global countRows
+    range_name=f'RealData!C{countRows}:K'
+    response = service.spreadsheets().values().get(
+      spreadsheetId=spreadsheet_id, 
+      range=range_name,
+      valueRenderOption='UNFORMATTED_VALUE',
+      majorDimension='ROWS',
+    ).execute()
 
-  values = response.get('values', [])
+    values = response.get('values', [])
 
-  if(len(values)>9):
-    countRows=countRows+len(values)-9
-    read_data()
-  else:
-    array_values=values
-    data_float32 = np.array(array_values, dtype=np.float32)
-    print("Count Rows: ",countRows)
-    X_test[0] = data_float32
+    if(len(values)>9):
+      countRows=countRows+len(values)-9
+      read_data()
+    else:
+      array_values=values
+      data_float32 = np.array(array_values, dtype=np.float32)
+      print("Count Rows: ",countRows)
+      X_test[0] = data_float32
+  except Exception as e:
+        print("Đã xảy ra lỗi:", e)
 
 read_data()
 
@@ -135,6 +141,7 @@ def onMessage(data):
   
   # Update  new value for X_test
   mqtt_value=np.array(real_values[0][2:], dtype=np.float32)
+  
   X_test[0] = np.vstack((X_test[0][1:], mqtt_value))
   print("X_test",X_test)
 
