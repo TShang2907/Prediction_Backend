@@ -43,6 +43,7 @@ range_name_real_sheet='RealData'
 message = {
   "station_id": "SENSOR_PREDICTION_0002",
   "station_name": "SENSOR PREDICTION 0002",  
+  "timestamp":"24/04/2024 10:25:17",
   "sensor_predict": [
     {
       "temp_0001": 0,
@@ -141,6 +142,7 @@ def onMessage(data):
 
   prediction_values[0][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
   real_values[0][1]=prediction_values[0][1]
+  message["timestamp"]=prediction_values[0][1]
 
   
   
@@ -189,9 +191,10 @@ def onMessage(data):
     message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
     message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
     storeDatabase(prediction_values,prediction_sheet)
-    
-  mqtt.publish(MQTT_TOPIC_AI, message)
 
+  mqtt.publish(MQTT_TOPIC_AI, message)
+  # if(countPrediction>1):
+  #   storeDatabase(prediction_values,prediction_sheet)
 
 
 mqtt.setRecvCallBack(onMessage)
