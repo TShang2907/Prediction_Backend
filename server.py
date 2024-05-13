@@ -188,11 +188,9 @@ def onMessage(data):
     message["sensor_predict"][0]["Nito_0002"] = rounded_values[6]
     message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
     message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
-
-
-    mqtt.publish(MQTT_TOPIC_AI, message)
     storeDatabase(prediction_values,prediction_sheet)
-  
+    
+  mqtt.publish(MQTT_TOPIC_AI, message)
 
 
 
