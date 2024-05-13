@@ -15,7 +15,7 @@ mqtt=MQTTHelper()
 
 # Google Sheets Receive Data
 sheetGetData_id = '1A1V1pnv-MvBhynMW7rBfc0m5X6Cc3QmOssjgjzMl8j0'
-countRows=1430
+countRows=1300
 isFirst=True
 # API key
 api_key = 'AIzaSyCGQxAPIFmR03S3CbNDtulHhxfdAQNmTbM'   # Lấy tại Google Cloud -->API_KEY
@@ -124,14 +124,14 @@ def read_data():
 
   values = response.get('values', [])
 
-  if(len(values)>24):
-    countRows=countRows+len(values)-24
+  if(len(values)>144):
+    countRows=countRows+len(values)-144
     read_data()
   else:
     array_values=values
     data_float32 = np.array(array_values, dtype=np.float32)
     print("Count Rows: ",countRows)
-    X_test[0] = data_float32
+    X_test[0] = data_float32[::6,:]
     print(X_test)
 
 read_data()
@@ -140,7 +140,7 @@ read_data()
 def onMessage(data):
   global countPrediction  # Khai báo biến count là biến toàn cục
   countPrediction=countPrediction+1
-  if(countPrediction==9):
+  if(countPrediction==144):
     countPrediction=1
     
   index_value=2
@@ -178,7 +178,7 @@ def onMessage(data):
   X_test[0] = np.vstack((X_test[0][1:], mqtt_value))
   print("X_test",X_test)
 
-  storeDatabase(real_values,real_sheet)
+  # storeDatabase(real_values,real_sheet)
   
   # Load model Prediction, tinh gia tri du doan
   if (countPrediction==1):
