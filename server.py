@@ -15,7 +15,7 @@ mqtt=MQTTHelper()
 
 # Google Sheets Receive Data
 sheetGetData_id = '1A1V1pnv-MvBhynMW7rBfc0m5X6Cc3QmOssjgjzMl8j0'
-countRows=500
+countRows=1430
 isFirst=True
 # API key
 api_key = 'AIzaSyCGQxAPIFmR03S3CbNDtulHhxfdAQNmTbM'   # Lấy tại Google Cloud -->API_KEY
@@ -23,7 +23,7 @@ parameter_1='majorDimension=ROWS'
 parameter_2='valueRenderOption=UNFORMATTED_VALUE'
 
 X_test = np.zeros((1, 9, 9), dtype=np.float32)
-
+countPrediction=0
 
 
 #Google Sheet Send Data
@@ -59,8 +59,15 @@ message = {
 }
 # Dữ liệu bạn muốn ghi lên Google Sheets
 prediction_values = [
-  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
-]
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
+  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]]
 real_values = [
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
 ]
@@ -84,8 +91,8 @@ def storeDatabase(new_values,sheet_name):
       insertDataOption='INSERT_ROWS',
       responseDateTimeRenderOption='FORMATTED_STRING'
     ).execute()
+
     print(json.dumps(response, indent=4))
-    
   except Exception as e:
     print("Đã xảy ra lỗi:", e)
 
@@ -112,12 +119,14 @@ def read_data():
       print("Count Rows: ",countRows)
       X_test[0] = data_float32
   except Exception as e:
-        print("Đã xảy ra lỗi:", e)
-
+    print("Đã xảy ra lỗi:", e)
 read_data()
 
 def onMessage(data):
   global countPrediction  # Khai báo biến count là biến toàn cục
+  countPrediction=countPrediction+1
+  if(countPrediction==9):
+    countPrediction=1
   index_value=2
   json_data = json.loads(data.payload.decode("utf-8"))
   print("Received: ",json_data )
@@ -146,32 +155,33 @@ def onMessage(data):
   print("X_test",X_test)
 
   storeDatabase(real_values,real_sheet)
-  
- # Load model Prediction, tinh gia tri du doan
-  loaded_model = load_model('LSTM2k2.keras')
-  yhat = loaded_model.predict(X_test, verbose=0)   
-  
-  # Làm tròn các giá trị trong y_hat[0][0] đến 2 chữ số thập phân
-  rounded_values = [round(value, 2) for value in yhat[0][0].tolist()]
 
-  # Gan gia tri du doan
-  prediction_values[0][2:] = rounded_values
+  if (countPrediction==1):
+  # Load model Prediction, tinh gia tri du doan
+    loaded_model = load_model('LSTM2k2.keras')
+    yhat = loaded_model.predict(X_test, verbose=0)   
+  
+    # Làm tròn các giá trị trong y_hat[0][0] đến 2 chữ số thập phân
+    for i in range(0,8):
+      rounded_values = [round(value, 2) for value in yhat[0][i].tolist()]
+      # Gan gia tri du doan
+      prediction_values[i][2:] = rounded_values
   
   
-  message["sensor_predict"][0]["temp_0001"] = rounded_values[0]
-  message["sensor_predict"][0]["humi_0001"] = rounded_values[1]
-  message["sensor_predict"][0]["temp_0002"] = rounded_values[2]
-  message["sensor_predict"][0]["humi_0002"] = rounded_values[3]
-  message["sensor_predict"][0]["ph_0002"] = rounded_values[4]
-  message["sensor_predict"][0]["EC_0002"] = rounded_values[5]
-  message["sensor_predict"][0]["Nito_0002"] = rounded_values[6]
-  message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
-  message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
+    message["sensor_predict"][0]["temp_0001"] = rounded_values[0]
+    message["sensor_predict"][0]["humi_0001"] = rounded_values[1]
+    message["sensor_predict"][0]["temp_0002"] = rounded_values[2]
+    message["sensor_predict"][0]["humi_0002"] = rounded_values[3]
+    message["sensor_predict"][0]["ph_0002"] = rounded_values[4]
+    message["sensor_predict"][0]["EC_0002"] = rounded_values[5]
+    message["sensor_predict"][0]["Nito_0002"] = rounded_values[6]
+    message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
+    message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
 
 
-  mqtt.publish(MQTT_TOPIC_AI, message)
-  storeDatabase(prediction_values,prediction_sheet)
-
+    mqtt.publish(MQTT_TOPIC_AI, message)
+    storeDatabase(prediction_values,prediction_sheet)
+  
 
 
 
