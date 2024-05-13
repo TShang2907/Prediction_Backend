@@ -110,7 +110,7 @@ def read_data():
     print(X_test)
 
 read_data()
-loaded_model = load_model('LSTM1h.keras')
+loaded_model = load_model('LSTM_1h_1data_2424.keras')
 yhat = loaded_model.predict(X_test, verbose=0)   
 
 def onMessage(data):

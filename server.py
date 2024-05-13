@@ -3,7 +3,7 @@ import json
 import requests
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from datetime import datetime
+from datetime import datetime,timedelta
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 from keras.models import load_model
@@ -68,6 +68,7 @@ prediction_values = [
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]]
+
 real_values = [
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
 ]
@@ -133,13 +134,23 @@ def onMessage(data):
   
   #lấy thoi gian hien tai
   current_time=datetime.now()
-  prediction_values[0][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
-  real_values[0][1]=prediction_values[0][1]
- 
-  # Chuyển đổi thành epoch time
+
   epoch_time = int(current_time.timestamp())
   prediction_values[0][0]=epoch_time
-  real_values[0][0]=epoch_time   
+  real_values[0][0]=epoch_time 
+
+  prediction_values[0][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
+  real_values[0][1]=prediction_values[0][1]
+
+  
+  
+  for i in range(1,9):
+    current_time = current_time + timedelta(minutes=10)
+    epoch_time = int(current_time.timestamp())
+
+    prediction_values[i][0]=epoch_time
+    prediction_values[i][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
+      
 
 
   #Gan gia tri cam bien nhan duoc tu mqtt
@@ -162,7 +173,7 @@ def onMessage(data):
     yhat = loaded_model.predict(X_test, verbose=0)   
   
     # Làm tròn các giá trị trong y_hat[0][0] đến 2 chữ số thập phân
-    for i in range(0,8):
+    for i in range(0,9):
       rounded_values = [round(value, 2) for value in yhat[0][i].tolist()]
       # Gan gia tri du doan
       prediction_values[i][2:] = rounded_values
