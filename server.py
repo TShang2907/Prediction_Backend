@@ -24,6 +24,7 @@ parameter_2='valueRenderOption=UNFORMATTED_VALUE'
 
 X_test = np.zeros((1, 9, 9), dtype=np.float32)
 countPrediction=0
+start_row=0
 
 
 #Google Sheet Send Data
@@ -98,10 +99,28 @@ def storeDatabase(new_values,sheet_name):
   except Exception as e:
     print("Đã xảy ra lỗi:", e)
 
+def updateDatabase(updated_values,start_row):
+    request_body = {
+        'values': updated_values
+    }
+
+    range_string = f'PredictionData!A{start_row}:K'
+
+    response = service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id,
+        range=range_string,
+        valueInputOption='USER_ENTERED',
+        body=request_body,
+        responseDateTimeRenderOption='FORMATTED_STRING'
+    ).execute()
+
+    print("Updated data in range:", range_string)
+    print(json.dumps(response, indent=4))
 
 def read_data():
   try:
     global countRows
+    global start_row
     range_name=f'RealData!C{countRows}:K'
     response = service.spreadsheets().values().get(
       spreadsheetId=spreadsheet_id, 
@@ -116,6 +135,7 @@ def read_data():
       countRows=countRows+len(values)-9
       read_data()
     else:
+      start_row=countRows
       array_values=values
       data_float32 = np.array(array_values, dtype=np.float32)
       print("Count Rows: ",countRows)
@@ -126,6 +146,7 @@ read_data()
 
 def onMessage(data):
   global countPrediction  # Khai báo biến count là biến toàn cục
+  global start_row
   countPrediction=countPrediction+1
   if(countPrediction==9):
     countPrediction=1
@@ -191,10 +212,12 @@ def onMessage(data):
     message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
     message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
     storeDatabase(prediction_values,prediction_sheet)
+    start_row=start_row+9
+
+  updateDatabase(prediction_values,start_row)
 
   mqtt.publish(MQTT_TOPIC_AI, message)
-  # if(countPrediction>1):
-  #   storeDatabase(prediction_values,prediction_sheet)
+ 
 
 
 mqtt.setRecvCallBack(onMessage)

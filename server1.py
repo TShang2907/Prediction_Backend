@@ -36,9 +36,12 @@ service = build('sheets', 'v4', credentials=creds)
 spreadsheet_id = '1qO1gqFsBra6mbL7lR1GeKLbJBeAL10zf1mfkAdoFPk0'
 
 prediction_sheet= f'PredictionData_1!A:K'
+prediction_sheet= f'PredictionData_1!A:K'
+
 real_sheet= f'RealData!A:K'
 range_name_real_sheet='RealData'
-
+start_row=-22
+countUpdate=0
 
 
 message = {
@@ -111,6 +114,23 @@ def storeDatabase(new_values,sheet_name):
 
   print(json.dumps(response, indent=4))
 
+def updateDatabase(updated_values,start_row):
+    request_body = {
+        'values': updated_values
+    }
+
+    range_string = f'PredictionData_1!A{start_row}:K'
+
+    response = service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id,
+        range=range_string,
+        valueInputOption='USER_ENTERED',
+        body=request_body,
+        responseDateTimeRenderOption='FORMATTED_STRING'
+    ).execute()
+
+    print("Updated data in range:", range_string)
+    print(json.dumps(response, indent=4))
 
 def read_data():
   global countRows
@@ -139,9 +159,16 @@ read_data()
 
 def onMessage(data):
   global countPrediction  # Khai báo biến count là biến toàn cục
+  global countUpdate
+  global start_row
   countPrediction=countPrediction+1
-  if(countPrediction==144):
+  countUpdate=countUpdate+1
+
+  if(countPrediction==6):
     countPrediction=1
+  if(countUpdate==2):
+    countUpdate=1
+  
     
   index_value=2
   json_data = json.loads(data.payload.decode("utf-8"))
@@ -160,7 +187,7 @@ def onMessage(data):
   message["timestamp"]=prediction_values[0][1]
 
   for i in range(1,24):
-    current_time = current_time + timedelta(minutes=10)
+    current_time = current_time + timedelta(minutes=60)
     epoch_time = int(current_time.timestamp())
 
     prediction_values[i][0]=epoch_time
@@ -181,26 +208,31 @@ def onMessage(data):
   # storeDatabase(real_values,real_sheet)
   
   # Load model Prediction, tinh gia tri du doan
-  if (countPrediction==1):
-    loaded_model = load_model('LSTM3k7.keras')
-    yhat = loaded_model.predict(X_test, verbose=0) 
+ 
+  loaded_model = load_model('LSTM3k7.keras')
+  yhat = loaded_model.predict(X_test, verbose=0) 
 
-    for i in range(0,24):
-      rounded_values = [round(value, 2) for value in yhat[0][i].tolist()]
+  for i in range(0,24):
+    rounded_values = [round(value, 2) for value in yhat[0][i].tolist()]
       # Gan gia tri du doan
-      prediction_values[i][2:] = rounded_values
+    prediction_values[i][2:] = rounded_values
 
-    message["sensor_predict"][0]["temp_0001"] = rounded_values[0]
-    message["sensor_predict"][0]["humi_0001"] = rounded_values[1]
-    message["sensor_predict"][0]["temp_0002"] = rounded_values[2]
-    message["sensor_predict"][0]["humi_0002"] = rounded_values[3]
-    message["sensor_predict"][0]["ph_0002"] = rounded_values[4]
-    message["sensor_predict"][0]["EC_0002"] = rounded_values[5]
-    message["sensor_predict"][0]["Nito_0002"] = rounded_values[6]
-    message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
-    message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
+  message["sensor_predict"][0]["temp_0001"] = rounded_values[0]
+  message["sensor_predict"][0]["humi_0001"] = rounded_values[1]
+  message["sensor_predict"][0]["temp_0002"] = rounded_values[2]
+  message["sensor_predict"][0]["humi_0002"] = rounded_values[3]
+  message["sensor_predict"][0]["ph_0002"] = rounded_values[4]
+  message["sensor_predict"][0]["EC_0002"] = rounded_values[5]
+  message["sensor_predict"][0]["Nito_0002"] = rounded_values[6]
+  message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
+  message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
   
+  if (countPrediction==1):
     storeDatabase(prediction_values,prediction_sheet)
+    start_row=start_row+24
+  elif (countUpdate==1):
+    updateDatabase(prediction_values,start_row)
+  
 
   mqtt.publish(MQTT_TOPIC_AI, message)
   
