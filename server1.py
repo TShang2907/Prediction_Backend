@@ -15,7 +15,7 @@ mqtt=MQTTHelper()
 
 # Google Sheets Receive Data
 sheetGetData_id = '1A1V1pnv-MvBhynMW7rBfc0m5X6Cc3QmOssjgjzMl8j0'
-countRows=1300
+countRows=2
 isFirst=True
 # API key
 api_key = 'AIzaSyCGQxAPIFmR03S3CbNDtulHhxfdAQNmTbM'   # Lấy tại Google Cloud -->API_KEY
@@ -23,7 +23,6 @@ parameter_1='majorDimension=ROWS'
 parameter_2='valueRenderOption=UNFORMATTED_VALUE'
 
 X_test = np.zeros((1, 24, 9), dtype=np.float32)
-countPrediction=0
 
 
 
@@ -35,12 +34,8 @@ service = build('sheets', 'v4', credentials=creds)
 # Truy cập vào một bảng tính cụ thể
 spreadsheet_id = '1qO1gqFsBra6mbL7lR1GeKLbJBeAL10zf1mfkAdoFPk0'
 
-prediction_sheet= f'PredictionData_1!A:K'
-prediction_sheet= f'PredictionData_1!A:K'
-
-real_sheet= f'RealData!A:K'
-range_name_real_sheet='RealData'
-start_row=-22
+# prediction_sheet= f'PredictionData_1!A:K'
+# real_sheet= f'RealData!A:K'
 
 
 message = {
@@ -92,33 +87,33 @@ real_values = [
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
 ]
 
-def storeDatabase(new_values,sheet_name):
-  if(sheet_name=='RealData!A:K'):
-    print("Send real data to Google Sheet: ",new_values[0])
-  else:
-    print("Send prediction data to Google Sheet: ",new_values[0])
+# def storeDatabase(new_values,sheet_name):
+#   if(sheet_name=='RealData!A:K'):
+#     print("Send real data to Google Sheet: ",new_values[0])
+#   else:
+#     print("Send prediction data to Google Sheet: ",new_values[0])
 
 
-  request_body = {
-            'values': new_values
-        }
-  response = service.spreadsheets().values().append(
-    spreadsheetId=spreadsheet_id, 
-    range=sheet_name,
-    valueInputOption='USER_ENTERED',
-    body=request_body,
-    insertDataOption='INSERT_ROWS',
-    responseDateTimeRenderOption='FORMATTED_STRING'
-  ).execute()
+#   request_body = {
+#             'values': new_values
+#         }
+#   response = service.spreadsheets().values().append(
+#     spreadsheetId=spreadsheet_id, 
+#     range=sheet_name,
+#     valueInputOption='USER_ENTERED',
+#     body=request_body,
+#     insertDataOption='INSERT_ROWS',
+#     responseDateTimeRenderOption='FORMATTED_STRING'
+#   ).execute()
 
-  print(json.dumps(response, indent=4))
+#   print(json.dumps(response, indent=4))
 
 def updateDatabase(updated_values,start_row):
     request_body = {
         'values': updated_values
     }
 
-    range_string = f'PredictionData_1!A{start_row}:K'
+    range_string = f'PredictionData_2!A{start_row}:K'
 
     response = service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id,
@@ -133,7 +128,7 @@ def updateDatabase(updated_values,start_row):
 
 def read_data():
   global countRows
-  range_name=f'RealData!C{countRows}:K'
+  range_name=f'Data!C{countRows}:K'
   response = service.spreadsheets().values().get(
     spreadsheetId=spreadsheet_id, 
     range=range_name,
@@ -147,6 +142,7 @@ def read_data():
     countRows=countRows+len(values)-144
     read_data()
   else:
+    countRows=countRows+8
     array_values=values
     data_float32 = np.array(array_values, dtype=np.float32)
     print("Count Rows: ",countRows)
@@ -157,12 +153,9 @@ read_data()
   
 
 def onMessage(data):
-  global countPrediction  # Khai báo biến count là biến toàn cục
-  global start_row
-  countPrediction=countPrediction+1
-  if(countPrediction==144):
-    countPrediction=1
-  
+  global countRows
+  countRows=countRows+1
+ 
     
   index_value=2
   json_data = json.loads(data.payload.decode("utf-8"))
@@ -221,10 +214,8 @@ def onMessage(data):
   message["sensor_predict"][0]["Photpho_0002"] =rounded_values[7]
   message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
   
-  if (countPrediction==1):
-    storeDatabase(prediction_values,prediction_sheet)
-    start_row=start_row+24
-  updateDatabase(prediction_values,start_row)
+ 
+  updateDatabase(prediction_values,countRows)
   
 
   mqtt.publish(MQTT_TOPIC_AI, message)

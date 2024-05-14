@@ -15,7 +15,7 @@ mqtt=MQTTHelper()
 
 # Google Sheets Receive Data
 sheetGetData_id = '1A1V1pnv-MvBhynMW7rBfc0m5X6Cc3QmOssjgjzMl8j0'
-countRows=1500
+countRows=2
 # API key
 api_key = 'AIzaSyCGQxAPIFmR03S3CbNDtulHhxfdAQNmTbM'   # Lấy tại Google Cloud -->API_KEY
 parameter_1='majorDimension=ROWS'
@@ -32,9 +32,7 @@ service = build('sheets', 'v4', credentials=creds)
 # Truy cập vào một bảng tính cụ thể
 spreadsheet_id = '1qO1gqFsBra6mbL7lR1GeKLbJBeAL10zf1mfkAdoFPk0'
 
-prediction_sheet= f'PredictionData!A:K'
 real_sheet= f'RealData!A:K'
-range_name_real_sheet='RealData'
 
 
 
@@ -101,7 +99,7 @@ def updateDatabase(updated_values,start_row):
         'values': updated_values
     }
 
-    range_string = f'PredictionData!A{start_row}:K'
+    range_string = f'PredictionData_1!A{start_row}:K'
 
     response = service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id,
@@ -117,7 +115,7 @@ def updateDatabase(updated_values,start_row):
 def read_data():
   try:
     global countRows
-    range_name=f'RealData!C{countRows}:K'
+    range_name=f'Data!C{countRows}:K'
     response = service.spreadsheets().values().get(
       spreadsheetId=spreadsheet_id, 
       range=range_name,
