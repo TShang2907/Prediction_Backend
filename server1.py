@@ -160,8 +160,6 @@ def onMessage(data):
   global countPrediction  # Khai báo biến count là biến toàn cục
   global start_row
   countPrediction=countPrediction+1
-  countUpdate=countUpdate+1
-
   if(countPrediction==144):
     countPrediction=1
   
