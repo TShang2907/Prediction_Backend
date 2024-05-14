@@ -41,7 +41,6 @@ prediction_sheet= f'PredictionData_1!A:K'
 real_sheet= f'RealData!A:K'
 range_name_real_sheet='RealData'
 start_row=-22
-countUpdate=0
 
 
 message = {
@@ -159,15 +158,12 @@ read_data()
 
 def onMessage(data):
   global countPrediction  # Khai báo biến count là biến toàn cục
-  global countUpdate
   global start_row
   countPrediction=countPrediction+1
   countUpdate=countUpdate+1
 
   if(countPrediction==144):
     countPrediction=1
-  if(countUpdate==6):
-    countUpdate=1
   
     
   index_value=2
@@ -230,8 +226,7 @@ def onMessage(data):
   if (countPrediction==1):
     storeDatabase(prediction_values,prediction_sheet)
     start_row=start_row+24
-  elif (countUpdate==1):
-    updateDatabase(prediction_values,start_row)
+  updateDatabase(prediction_values,start_row)
   
 
   mqtt.publish(MQTT_TOPIC_AI, message)
