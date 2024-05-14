@@ -164,9 +164,9 @@ def onMessage(data):
   countPrediction=countPrediction+1
   countUpdate=countUpdate+1
 
-  if(countPrediction==6):
+  if(countPrediction==144):
     countPrediction=1
-  if(countUpdate==2):
+  if(countUpdate==6):
     countUpdate=1
   
     
