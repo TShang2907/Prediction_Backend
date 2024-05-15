@@ -87,28 +87,8 @@ real_values = [
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
 ]
 
-# def storeDatabase(new_values,sheet_name):
-#   if(sheet_name=='RealData!A:K'):
-#     print("Send real data to Google Sheet: ",new_values[0])
-#   else:
-#     print("Send prediction data to Google Sheet: ",new_values[0])
-
-
-#   request_body = {
-#             'values': new_values
-#         }
-#   response = service.spreadsheets().values().append(
-#     spreadsheetId=spreadsheet_id, 
-#     range=sheet_name,
-#     valueInputOption='USER_ENTERED',
-#     body=request_body,
-#     insertDataOption='INSERT_ROWS',
-#     responseDateTimeRenderOption='FORMATTED_STRING'
-#   ).execute()
-
-#   print(json.dumps(response, indent=4))
-
 def updateDatabase(updated_values,start_row):
+  try:
     request_body = {
         'values': updated_values
     }
@@ -125,29 +105,34 @@ def updateDatabase(updated_values,start_row):
 
     print("Updated data in range:", range_string)
     print(json.dumps(response, indent=4))
+  except Exception as e:
+    print("Đã xảy ra lỗi:", e)
 
 def read_data():
-  global countRows
-  range_name=f'Data!C{countRows}:K'
-  response = service.spreadsheets().values().get(
-    spreadsheetId=spreadsheet_id, 
-    range=range_name,
-    valueRenderOption='UNFORMATTED_VALUE',
-    majorDimension='ROWS',
-  ).execute()
+  try:
+    global countRows
+    range_name=f'Data!C{countRows}:K'
+    response = service.spreadsheets().values().get(
+      spreadsheetId=spreadsheet_id, 
+      range=range_name,
+      valueRenderOption='UNFORMATTED_VALUE',
+      majorDimension='ROWS',
+    ).execute()
 
-  values = response.get('values', [])
+    values = response.get('values', [])
 
-  if(len(values)>144):
-    countRows=countRows+len(values)-144
-    read_data()
-  else:
-    countRows=countRows+8
-    array_values=values
-    data_float32 = np.array(array_values, dtype=np.float32)
-    print("Count Rows: ",countRows)
-    X_test[0] = data_float32[::6,:]
-    print(X_test)
+    if(len(values)>144):
+      countRows=countRows+len(values)-144
+      read_data()
+    else:
+      countRows=countRows+8
+      array_values=values
+      data_float32 = np.array(array_values, dtype=np.float32)
+      print("Count Rows: ",countRows)
+      X_test[0] = data_float32[::6,:]
+      print(X_test)
+  except Exception as e:
+      print("Đã xảy ra lỗi:", e)
 
 read_data()
   

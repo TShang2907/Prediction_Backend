@@ -95,6 +95,7 @@ def storeDatabase(new_values,sheet_name):
     print("Đã xảy ra lỗi:", e)
 
 def updateDatabase(updated_values,start_row):
+  try:
     request_body = {
         'values': updated_values
     }
@@ -111,6 +112,8 @@ def updateDatabase(updated_values,start_row):
 
     print("Updated data in range:", range_string)
     print(json.dumps(response, indent=4))
+  except Exception as e:
+    print("Đã xảy ra lỗi:", e)
 
 def read_data():
   try:
@@ -136,6 +139,7 @@ def read_data():
       X_test[0] = data_float32
   except Exception as e:
     print("Đã xảy ra lỗi:", e)
+
 read_data()
 
 def onMessage(data):
