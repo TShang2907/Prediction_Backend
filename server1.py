@@ -8,6 +8,7 @@ import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 from keras.models import load_model
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 from MQTT import *
 #MQTT
 MQTT_TOPIC_AI = "/innovation/airmonitoring/AI_1"
@@ -130,12 +131,12 @@ def read_data():
       data_float32 = np.array(array_values, dtype=np.float32)
       print("Count Rows: ",countRows)
       X_test[0] = data_float32[::6,:]
-      print(X_test)
+    
   except Exception as e:
       print("Đã xảy ra lỗi:", e)
 
 read_data()
-  
+
 
 def onMessage(data):
   global countRows
@@ -175,14 +176,18 @@ def onMessage(data):
   mqtt_value=np.array(real_values[0][2:], dtype=np.float32)
   
   X_test[0] = np.vstack((X_test[0][1:], mqtt_value))
-  print("X_test",X_test)
 
   # storeDatabase(real_values,real_sheet)
   
   # Load model Prediction, tinh gia tri du doan
- 
+  scaler = MinMaxScaler()
+  X_test[0] = scaler.fit_transform(X_test[0])
+  print(X_test)
   loaded_model = load_model('LSTM3k7.keras')
   yhat = loaded_model.predict(X_test, verbose=0) 
+  yhat[0] = scaler.inverse_transform(yhat[0])
+  print(yhat[0])
+
 
   for i in range(0,24):
     rounded_values = [round(value, 2) for value in yhat[0][i].tolist()]
