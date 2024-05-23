@@ -16,7 +16,7 @@ mqtt=MQTTHelper()
 
 # Google Sheets Receive Data
 sheetGetData_id = '1A1V1pnv-MvBhynMW7rBfc0m5X6Cc3QmOssjgjzMl8j0'
-countRows=2
+countRows=900
 isFirst=True
 # API key
 api_key = 'AIzaSyCGQxAPIFmR03S3CbNDtulHhxfdAQNmTbM'   # Lấy tại Google Cloud -->API_KEY
@@ -126,7 +126,7 @@ def read_data():
       countRows=countRows+len(values)-144
       read_data()
     else:
-      countRows=countRows+8
+      countRows=1
       array_values=values
       data_float32 = np.array(array_values, dtype=np.float32)
       print("Count Rows: ",countRows)
