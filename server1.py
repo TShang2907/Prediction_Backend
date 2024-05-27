@@ -183,7 +183,7 @@ def onMessage(data):
   scaler = MinMaxScaler()
   X_test[0] = scaler.fit_transform(X_test[0])
   print(X_test)
-  loaded_model = load_model('LSTM3k7.keras')
+  loaded_model = load_model('LSTM_6060.keras')
   yhat = loaded_model.predict(X_test, verbose=0) 
   yhat[0] = scaler.inverse_transform(yhat[0])
   print(yhat[0])
