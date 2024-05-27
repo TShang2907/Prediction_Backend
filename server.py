@@ -15,7 +15,7 @@ mqtt=MQTTHelper()
 
 # Google Sheets Receive Data
 sheetGetData_id = '1A1V1pnv-MvBhynMW7rBfc0m5X6Cc3QmOssjgjzMl8j0'
-countRows=2
+countRows=1400
 # API key
 api_key = 'AIzaSyCGQxAPIFmR03S3CbNDtulHhxfdAQNmTbM'   # Lấy tại Google Cloud -->API_KEY
 parameter_1='majorDimension=ROWS'
@@ -76,7 +76,6 @@ def storeDatabase(new_values,sheet_name):
       print("Send real data to Google Sheet: ",new_values[0])
     else:
       print("Send prediction data to Google Sheet: ",new_values[0])
-
 
     request_body = {
               'values': new_values
@@ -184,7 +183,7 @@ def onMessage(data):
   X_test[0] = np.vstack((X_test[0][1:], mqtt_value))
   print("X_test",X_test)
 
-  storeDatabase(real_values,real_sheet)
+  #storeDatabase(real_values,real_sheet)
 
     #if (countPrediction==1):
   # Load model Prediction, tinh gia tri du doan
