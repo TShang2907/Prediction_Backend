@@ -16,7 +16,8 @@ mqtt=MQTTHelper()
 
 # Google Sheets Receive Data
 sheetGetData_id = '1A1V1pnv-MvBhynMW7rBfc0m5X6Cc3QmOssjgjzMl8j0'
-countRows=900
+countRows=1400
+RowsUpdate=1
 isFirst=True
 # API key
 api_key = 'AIzaSyCGQxAPIFmR03S3CbNDtulHhxfdAQNmTbM'   # Lấy tại Google Cloud -->API_KEY
@@ -84,9 +85,6 @@ prediction_values = [
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5],
   [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
 ]
-real_values = [
-  [1713929117, "24/04/2024 10:25:17", 33, 62.6, 31.5, 24.4, 6.8, 23, 1, 2, 5]
-]
 
 def updateDatabase(updated_values,start_row):
   try:
@@ -126,7 +124,6 @@ def read_data():
       countRows=countRows+len(values)-144
       read_data()
     else:
-      countRows=1
       array_values=values
       data_float32 = np.array(array_values, dtype=np.float32)
       print("Count Rows: ",countRows)
@@ -135,15 +132,15 @@ def read_data():
   except Exception as e:
       print("Đã xảy ra lỗi:", e)
 
-read_data()
-
 
 def onMessage(data):
+  
   global countRows
+  global RowsUpdate
   countRows=countRows+1
- 
-    
-  index_value=2
+  RowsUpdate=RowsUpdate+1
+  read_data()
+
   json_data = json.loads(data.payload.decode("utf-8"))
   print("Received: ",json_data )
   
@@ -152,11 +149,9 @@ def onMessage(data):
 
   epoch_time = int(current_time.timestamp())
   prediction_values[0][0]=epoch_time
-  real_values[0][0]=epoch_time 
-
- 
+  
   prediction_values[0][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
-  real_values[0][1]=prediction_values[0][1]
+  
   message["timestamp"]=prediction_values[0][1]
 
   for i in range(1,24):
@@ -166,18 +161,6 @@ def onMessage(data):
     prediction_values[i][0]=epoch_time
     prediction_values[i][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
 
-  #Gan gia tri cam bien nhan duoc tu mqtt
-  for sensor in json_data["sensors"]:
-    if(index_value<11):
-      real_values[0][index_value]=sensor["value"]
-    index_value=index_value+1
-  
-  # Update  new value for X_test
-  mqtt_value=np.array(real_values[0][2:], dtype=np.float32)
-  
-  X_test[0] = np.vstack((X_test[0][1:], mqtt_value))
-
-  # storeDatabase(real_values,real_sheet)
   
   # Load model Prediction, tinh gia tri du doan
   scaler = MinMaxScaler()
@@ -205,7 +188,7 @@ def onMessage(data):
   message["sensor_predict"][0]["Kali_0002"] = rounded_values[8]
   
  
-  updateDatabase(prediction_values,countRows)
+  updateDatabase(prediction_values,RowsUpdate)
   
 
   mqtt.publish(MQTT_TOPIC_AI, message)
