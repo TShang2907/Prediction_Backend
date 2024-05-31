@@ -126,7 +126,6 @@ def read_data():
     else:
       array_values=values
       data_float32 = np.array(array_values, dtype=np.float32)
-      print("Count Rows: ",countRows)
       X_test[0] = data_float32[::6,:]
     
   except Exception as e:
@@ -140,6 +139,9 @@ def onMessage(data):
   countRows=countRows+1
   RowsUpdate=RowsUpdate+1
   read_data()
+  print("Count Rows: ",countRows)
+  print("\n");
+  print("Count RowsUpdate: ",RowsUpdate)
 
   json_data = json.loads(data.payload.decode("utf-8"))
   print("Received: ",json_data )
@@ -161,15 +163,15 @@ def onMessage(data):
     prediction_values[i][0]=epoch_time
     prediction_values[i][1]=current_time.strftime("%d/%m/%Y %H:%M:%S")
 
-  
+  print(X_test)
   # Load model Prediction, tinh gia tri du doan
   scaler = MinMaxScaler()
   X_test[0] = scaler.fit_transform(X_test[0])
-  print(X_test)
+ 
   loaded_model = load_model('LSTM_6060.keras')
   yhat = loaded_model.predict(X_test, verbose=0) 
   yhat[0] = scaler.inverse_transform(yhat[0])
-  print(yhat[0])
+  #print(yhat[0])
 
 
   for i in range(0,24):
